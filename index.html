@@ -20,9 +20,16 @@
             --glass-border: rgba(255, 255, 255, 0.9);
         }
 
+        /* Optimized Noise Filter to prevent lag */
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.04"/%3E%3C/svg%3E');
+            pointer-events: none; z-index: 9999;
+            transform: translateZ(0); will-change: transform;
+        }
+
         /* NATIVE, BUTTERY SMOOTH SCROLLING */
         html {
-            /* Force scrollbar to prevent the card from "jumping" when new content appears */
             overflow-y: scroll; 
             overflow-x: hidden;
             scroll-behavior: smooth;
@@ -79,7 +86,7 @@
         
         /* APPLE-STYLE SMOOTH REVEAL TRANSITIONS */
         .section { 
-            min-height: 80vh; /* Reduced from 100vh so user doesn't have to scroll as far */
+            min-height: 80vh; 
             width: 100%; display: flex; align-items: center; justify-content: center; 
             position: relative; opacity: 0; transform: translateY(40px) scale(0.98); 
             transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); 
@@ -145,14 +152,14 @@
         /* --- THE BAIT & SWITCH FINALE ARENA --- */
         #playground { position: relative; width: 100%; height: 450px; margin-top: 20px; background: transparent; overflow: hidden; border-radius: 20px; }
         .button-stack { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; height: 70px; }
-        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
+        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; border: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
 
         #good-btn { background: var(--accent); color: #fff; box-shadow: 0 15px 30px rgba(212, 163, 115, 0.4); border: none; position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transform: scale(0.5); pointer-events: none; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         #good-btn.revealed { opacity: 1; transform: scale(1); pointer-events: all; }
         
         #bad-btn { background: var(--text-dark); color: #fff; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: absolute; top: 0; left: 0; z-index: 10; transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.3s; }
 
-        /* --- FINAL REVEAL OVERLAY & SCROLL FIX --- */
+        /* --- FINAL REVEAL OVERLAY --- */
         #final-message { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(253, 251, 249, 0.98); 
@@ -184,9 +191,9 @@
         .social-icon {
             display: flex; justify-content: center; align-items: center; width: 45px; height: 45px; border-radius: 50%;
             background: #fff; border: 1px solid rgba(0,0,0,0.1); color: var(--text-dark); text-decoration: none;
-            transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: none; outline: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: none; outline: none;
         }
-        .social-icon:hover, .social-icon.active { transform: translateY(-5px); background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 10px 20px rgba(212, 163, 115, 0.3); }
+        .social-icon:hover, .social-icon.active { transform: translateY(-5px) scale(1.05); background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 10px 20px rgba(212, 163, 115, 0.3); }
         .social-icon svg { width: 20px; height: 20px; }
 
         /* Sleek, minimized callouts */
@@ -204,6 +211,34 @@
 
         .aesthetic-signature { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
 
+        /* --- MOBILE OPTIMIZATIONS --- */
+        @media (max-width: 768px) {
+            /* Disable custom cursor entirely on touch devices */
+            body, html, .interactable, .btn, .social-icon, input[type=range]::-webkit-slider-thumb, a, button { cursor: auto !important; }
+            #cursor-dot, #cursor-outline { display: none !important; }
+            
+            .glass-box { padding: 30px 20px; border-radius: 20px; }
+            h1 { font-size: clamp(2.5rem, 8vw, 3.5rem) !important; }
+            h2 { font-size: clamp(1.5rem, 6vw, 2rem) !important; }
+            p { font-size: 1rem !important; }
+            
+            .switch-label { font-size: 0.9rem; max-width: 75%; }
+            .toggle-switch { width: 36px; height: 20px; }
+            .toggle-switch::after { width: 14px; height: 14px; }
+            .toggle-switch.active::after { transform: translateX(16px); }
+
+            #playground { height: 350px; }
+            .button-stack { width: 100%; max-width: 320px; }
+            .btn { font-size: 0.95rem; padding: 0 20px; white-space: normal; height: 60px; line-height: 1.2; text-align: center; }
+            
+            #intro-screen h1 { font-size: 4rem !important; }
+            .envelope { width: 220px; height: 140px; }
+            
+            #final-message h1 { font-size: 2.5rem !important; }
+            .final-content-wrapper { padding: 5vh 15px 30px 15px; }
+            .excuse-bubble { font-size: 0.85rem; padding: 8px 15px; }
+        }
+
     </style>
 </head>
 <body>
@@ -212,10 +247,6 @@
 
     <div id="cursor-dot"></div>
     <div id="cursor-outline"></div>
-
-    <div class="parallax-shape shape-1" data-speed="0.1"></div>
-    <div class="parallax-shape shape-2" data-speed="-0.15"></div>
-    <div class="parallax-shape shape-3" data-speed="0.05"></div>
 
     <div id="intro-screen">
         <h1 class="fade-up-1" style="font-family: 'Caveat', cursive; font-size: 5.5rem; color: var(--accent); margin-bottom: 20px;">Hi Natalie,</h1>
@@ -230,6 +261,10 @@
     </div>
 
     <div id="main-content">
+        
+        <div class="parallax-shape shape-1" data-speed="0.1"></div>
+        <div class="parallax-shape shape-2" data-speed="-0.15"></div>
+        <div class="parallax-shape shape-3" data-speed="0.05"></div>
 
         <div id="phase-1-sections">
             <div class="section">
@@ -432,8 +467,6 @@
                 const main = document.getElementById('main-content');
                 main.style.display = 'block';
                 
-                window.scrollTo({ top: 0, behavior: 'instant' }); 
-                
                 requestAnimationFrame(() => {
                     main.style.opacity = '1';
                     document.querySelectorAll('.section').forEach(sec => observer.observe(sec));
@@ -443,7 +476,7 @@
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.2 });
+        }, { threshold: 0.15 });
 
         // --- 3. PARALLAX ONLY ON BACKGROUND BLOBS ---
         const parallaxElements = document.querySelectorAll('.parallax-shape');
@@ -474,7 +507,7 @@
             sDate.style.color = timelineData[val].color;
             sText.innerText = timelineData[val].text;
 
-            // UNLOCK PHASE 2 
+            // UNLOCK PHASE 2 WITHOUT JUMPING
             if (val === 6 && !phase2Unlocked) {
                 phase2Unlocked = true;
                 const phase2 = document.getElementById('phase-2-sections');
@@ -533,8 +566,13 @@
 
         function moveBubble(bubble) {
             if(bubble.style.display === 'none') return;
-            const x = Math.random() * (board.offsetWidth - 180);
-            const y = Math.random() * (board.offsetHeight - 50);
+            
+            // Mobile safe boundaries
+            const maxX = Math.max(10, board.offsetWidth - bubble.offsetWidth - 20);
+            const maxY = Math.max(10, board.offsetHeight - bubble.offsetHeight - 20);
+            
+            const x = Math.random() * maxX;
+            const y = Math.random() * maxY;
             bubble.style.transition = 'all 1.5s ease-in-out';
             bubble.style.transform = `translate(${x}px, ${y}px)`;
             setTimeout(() => moveBubble(bubble), 1500);
@@ -559,7 +597,7 @@
             });
         });
 
-        // --- 8. THE CHASE FINALE ---
+        // --- 8. THE CHASE FINALE (Touch Support Added) ---
         const badBtn = document.getElementById('bad-btn');
         const goodBtn = document.getElementById('good-btn');
         const playground = document.getElementById('playground');
@@ -575,8 +613,9 @@
             "Okay, fine. You win. 🏳️"
         ];
 
-        badBtn.addEventListener('mouseenter', (e) => {
+        function handleBadBtnInteraction(e) {
             if (chaseCount >= 5) return; 
+            if (e.type === 'touchstart') e.preventDefault(); // Prevent double firing on mobile
 
             badBtn.innerText = chaseTexts[chaseCount];
             chaseCount++;
@@ -611,14 +650,24 @@
                     confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
                 }, 300);
             }
-        });
+        }
+
+        badBtn.addEventListener('mouseenter', handleBadBtnInteraction);
+        badBtn.addEventListener('touchstart', handleBadBtnInteraction, {passive: false});
 
         function triggerJump(e) {
             const playRect = playground.getBoundingClientRect();
             const stackRect = stackContainer.getBoundingClientRect();
             
-            let mouseX = e.clientX - playRect.left;
-            let mouseY = e.clientY - playRect.top;
+            // Handle both touch and mouse events safely
+            let clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+            let clientY = e.touches && e.touches.length > 0 ? e.touches[0].clientY : e.clientY;
+            
+            if (clientX === undefined) { clientX = playRect.left + playRect.width/2; }
+            if (clientY === undefined) { clientY = playRect.top + playRect.height/2; }
+
+            let mouseX = clientX - playRect.left;
+            let mouseY = clientY - playRect.top;
 
             const badW = badBtn.offsetWidth;
             const badH = badBtn.offsetHeight;
@@ -683,7 +732,7 @@
             }
         });
 
-        // --- 9. FINAL CELEBRATION (HEAVY CONTINUOUS SHOWER, NO LAG) ---
+        // --- 9. FINAL CELEBRATION & SCROLL LOCK ---
         const finalMsg = document.getElementById('final-message');
         const myCanvas = document.getElementById('finale-confetti-canvas');
         const myConfetti = confetti.create(myCanvas, { resize: true, useWorker: true });

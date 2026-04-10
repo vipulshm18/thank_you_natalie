@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thank You For Everything</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@500;700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* --- GLOBAL FIXES & DESIGN SYSTEM --- */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        :root {
+            --bg-color: #Fdfbf9; 
+            --text-dark: #2A2A2A;
+            --text-muted: #737373;
+            --accent: #D4A373; 
+            --glass-bg: rgba(255, 255, 255, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.9);
+        }
+
+        body::after {
+            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.04"/%3E%3C/svg%3E');
+            pointer-events: none; z-index: 9999;
+        }
+
+        /* PERMANENTLY HIDE BROWSER WINDOW SCROLLBAR */
+        body, html {
+            margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark);
+            font-family: 'Inter', sans-serif; overflow: hidden; 
+            cursor: none; width: 100%; height: 100%;
+        }
+
+        /* --- THE NEW SINGLE SCROLL ROOT --- */
+        #all-sections-scroll-root {
+            width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;
+            scroll-behavior: smooth; position: relative; z-index: 5;
+        }
+
+        /* --- CUSTOM FLUID CURSOR --- */
+        #cursor-dot { width: 8px; height: 8px; background: var(--text-dark); border-radius: 50%; position: fixed; pointer-events: none; z-index: 10000; transform: translate(-50%, -50%); transition: width 0.2s, height 0.2s; }
+        #cursor-outline { width: 40px; height: 40px; border: 1px solid rgba(42, 42, 42, 0.3); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); transition: 0.1s ease-out; }
+        .cursor-hover #cursor-outline { transform: translate(-50%, -50%) scale(1.5); border-color: var(--accent); background: rgba(212, 163, 115, 0.1); }
+
+        /* --- PARALLAX BLOBS & GLITTER --- */
+        .parallax-shape { position: absolute; border-radius: 50%; filter: blur(60px); z-index: -1; opacity: 0.6; pointer-events: none; }
+        .shape-1 { width: 40vw; height: 40vw; background: #FEFAE0; top: 5%; left: -10%; }
+        .shape-2 { width: 35vw; height: 35vw; background: #E9EDC9; top: 40%; right: -5%; }
+        .shape-3 { width: 50vw; height: 50vw; background: #FAEDCD; top: 70%; left: 20%; }
+
+        #glitter-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+        .glitter { position: absolute; background: var(--accent); border-radius: 50%; opacity: 0; box-shadow: 0 0 12px var(--accent); animation: float-up infinite linear; }
+        @keyframes float-up { 0% { transform: translateY(110vh) scale(0.5); opacity: 0; } 20% { opacity: 0.5; } 80% { opacity: 0.5; } 100% { transform: translateY(-10vh) scale(1.2); opacity: 0; } }
+
+        /* --- CINEMATIC INTRO SCREEN --- */
+        #intro-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color);
+            display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5000;
+            transition: opacity 1s cubic-bezier(0.8, 0, 0.2, 1); text-align: center; padding: 0 20px;
+        }
+        
+        .fade-up-1 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.5s; }
+        .fade-up-2 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 1.8s; }
+        .fade-up-3 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 3.2s; }
+        .fade-up-4 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 4.8s; }
+
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 10px 30px rgba(212, 163, 115, 0.2); } 50% { box-shadow: 0 15px 50px rgba(212, 163, 115, 0.6); } }
+        @keyframes slidePulse { 0%, 100% { opacity: 0.5; transform: translateX(0); } 50% { opacity: 1; transform: translateX(5px); } }
+
+        .envelope {
+            width: 260px; height: 170px; background: var(--glass-bg); border: 1px solid var(--accent);
+            border-radius: 12px; position: relative; backdrop-filter: blur(20px);
+            display: flex; justify-content: center; align-items: center;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); margin: 0 auto; cursor: none;
+            animation: pulseGlow 2.5s infinite; 
+        }
+        .envelope:hover { transform: scale(1.05) translateY(-10px); border-color: var(--accent); }
+        .envelope-text { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text-dark); letter-spacing: 1px; }
+
+        /* --- CONTENT WRAPPER INSIDE THE SCROLL ROOT --- */
+        #main-content { display: none; opacity: 0; width: 100%; margin: 0 auto; position: relative; z-index: 10; }
+        
+        .section { 
+            min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; 
+            position: relative; opacity: 0; transform: translateY(60px); 
+            transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); padding: 40px 20px;
+        }
+        .section.visible { opacity: 1; transform: translateY(0); }
+
+        .glass-box { 
+            background: var(--glass-bg); border: 1px solid var(--glass-border); 
+            border-radius: 28px; padding: 50px; backdrop-filter: blur(24px); 
+            box-shadow: 0 20px 50px rgba(0,0,0,0.04); 
+            width: 100%; max-width: 800px; text-align: center; margin: 0 auto;
+        }
+
+        h1 { font-family: 'Syne', sans-serif; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; letter-spacing: -2px; margin: 0 0 15px 0; font-weight: 800; }
+        h2 { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.5rem); line-height: 1.1; letter-spacing: -1px; margin: 0 0 15px 0; }
+        p { font-size: 1.15rem; line-height: 1.7; color: var(--text-muted); font-weight: 400; margin-bottom: 15px;}
+        
+        .accent-script { font-family: 'Caveat', cursive; font-size: 2.8rem; color: var(--accent); display: block; margin-bottom: -5px; transform: rotate(-2deg); }
+        .date-label { font-family: 'Inter', sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 3px; font-weight: 600; color: var(--accent); margin-bottom: 15px; display: block; }
+        .highlight { color: var(--text-dark); font-weight: 600; background: rgba(212, 163, 115, 0.15); padding: 2px 8px; border-radius: 6px; }
+
+        .action-btn {
+            font-family: 'Syne', sans-serif; font-size: 1.1rem; padding: 15px 40px; border-radius: 50px;
+            cursor: none; border: none; font-weight: 700; background: var(--text-dark); color: #fff;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; margin-top: 20px; display: inline-block;
+        }
+        .action-btn:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(0,0,0,0.15); }
+
+        /* --- THE TIMELINE SLIDER --- */
+        .slider-container { margin-top: 30px; width: 100%; padding: 20px 0; position: relative;}
+        .slide-instruction { font-size: 0.85rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 15px; animation: slidePulse 1.5s infinite; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; cursor: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: rgba(0,0,0,0.1); border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: var(--accent); cursor: none; margin-top: -9px; box-shadow: 0 0 15px rgba(212, 163, 115, 0.4); border: 3px solid #fff; transition: transform 0.1s; }
+        input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); }
+        
+        #slider-date { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.5rem; color: var(--text-dark); margin-top: 20px; transition: 0.3s; }
+        #slider-text { font-size: 1.1rem; color: var(--text-muted); min-height: 80px; margin-top: 10px; transition: 0.3s; padding: 0 20px;}
+
+        /* --- DYNAMIC SECTIONS --- */
+        #phase-2-sections, #game-1-section, #game-2-section, #finale-section { display: none; opacity: 0; transition: opacity 1s ease; flex-direction: column; width: 100%; }
+
+        /* --- GAME 1: THE SWITCHES --- */
+        .switch-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.03); text-align: left;}
+        .switch-row:last-child { border-bottom: none; }
+        .switch-label { font-weight: 500; font-size: 1rem; color: var(--text-dark); }
+        
+        .toggle-switch { position: relative; width: 44px; height: 24px; background: #e5e5e5; border-radius: 32px; cursor: none; transition: 0.3s; flex-shrink: 0;}
+        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .toggle-switch.active { background: var(--accent); }
+        .toggle-switch.active::after { transform: translateX(20px); }
+
+        #joke-message { color: #e63946; font-size: 1.6rem; font-weight: 700; opacity: 0; transition: 0.5s; margin-top: 20px; font-family: 'Caveat', cursive; line-height: 1.3;}
+
+        /* --- GAME 2: EXCUSE CATCHER --- */
+        #game-board { width: 100%; height: 350px; background: rgba(255, 255, 255, 0.4); border: 2px dashed rgba(212, 163, 115, 0.5); border-radius: 20px; position: relative; overflow: hidden; margin-top: 20px; }
+        .excuse-bubble { position: absolute; background: #fff; color: var(--text-dark); border: 1px solid var(--accent); padding: 10px 20px; border-radius: 50px; font-weight: 600; font-family: 'Syne', sans-serif; box-shadow: 0 10px 20px rgba(0,0,0,0.05); cursor: none; transition: transform 0.1s; white-space: nowrap; }
+        .excuse-bubble:hover { transform: scale(1.1); background: var(--accent); color: #fff; }
+        #game-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(5px); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 10; }
+
+        /* --- THE BAIT & SWITCH FINALE ARENA --- */
+        #playground { position: relative; width: 100%; height: 450px; margin-top: 20px; background: transparent; overflow: hidden; border-radius: 20px; }
+        .button-stack { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; height: 70px; }
+        
+        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
+
+        /* Updated Buttons to Grab Attention */
+        #bad-btn { 
+            background: var(--text-dark); color: #fff; border: none; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: absolute; top: 0; left: 0; z-index: 10; 
+            transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.3s; 
+        }
+
+        #good-btn { 
+            background: var(--accent); color: #fff; box-shadow: 0 15px 35px rgba(212, 163, 115, 0.4); 
+            border: none; position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transform: scale(0.5); 
+            pointer-events: none; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+        }
+        #good-btn.revealed { opacity: 1; transform: scale(1); pointer-events: all; }
+
+        /* --- FINAL REVEAL OVERLAY & SCROLL FIX --- */
+        #final-message { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(253, 251, 249, 0.98); backdrop-filter: blur(25px); z-index: 9000; 
+            opacity: 0; transition: opacity 1s ease; overflow-y: auto; 
+        }
+        #final-message.show { opacity: 1; }
+
+        .final-content-wrapper {
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 100%; width: 100%; padding: 10vh 20px 40px 20px; text-align: center;
+        }
+
+        /* --- FOOTER & AESTHETIC CALLOUTS --- */
+        .footer-credits { 
+            margin-top: auto; padding-top: 60px; display: flex; flex-direction: column; align-items: center; gap: 20px; 
+            animation: fadeUp 1.5s ease forwards 1s; opacity: 0; 
+        }
+        .social-links { display: flex; gap: 20px; align-items: center; }
+        .social-icon-wrapper { position: relative; display: inline-block; }
+
+        .social-icon {
+            display: flex; justify-content: center; align-items: center; width: 45px; height: 45px; border-radius: 50%;
+            background: #fff; border: 1px solid rgba(0,0,0,0.1); color: var(--text-dark); text-decoration: none;
+            transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(0,0,0,0.05); cursor: none; outline: none;
+        }
+        .social-icon:hover, .social-icon.active { transform: translateY(-5px); background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 10px 20px rgba(212, 163, 115, 0.3); }
+        .social-icon svg { width: 20px; height: 20px; }
+
+        /* Sleek, minimized callouts */
+        .callout {
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(10px);
+            background: rgba(255, 255, 255, 0.95); border: 1px solid var(--accent); backdrop-filter: blur(15px);
+            padding: 10px 16px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px;
+            opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08); white-space: nowrap; z-index: 9999;
+        }
+        .callout.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .callout::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: rgba(255, 255, 255, 0.95); border-right: 1px solid var(--accent); border-bottom: 1px solid var(--accent); }
+        .callout a { color: var(--text-dark); text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.3px; transition: color 0.2s; cursor: none; }
+        .callout a:hover { color: var(--accent); }
+
+        .aesthetic-signature { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
+
+    </style>
+</head>
+<body>
+
+    <div id="glitter-container"></div>
+
+    <div id="cursor-dot"></div>
+    <div id="cursor-outline"></div>
+
+    <div id="intro-screen">
+        <h1 class="fade-up-1" style="font-family: 'Caveat', cursive; font-size: 5.5rem; color: var(--accent); margin-bottom: 20px;">Hi Natalie,</h1>
+        <h2 class="fade-up-2" style="font-size: 1.8rem; font-weight: 600; margin-bottom: 25px;">Today is your last day.</h2>
+        <p class="fade-up-3" style="max-width: 650px; font-size: 1.2rem; line-height: 1.8; margin-bottom: 50px;">
+            Instead of writing a standard, boring farewell email, I decided to do something a little cooler for you. Thank you for being my absolute favorite person on the team so far, a true mentor, and an incredible leader.
+        </p>
+        
+        <div class="fade-up-4 interactable" id="envelope-btn">
+            <div class="envelope"><span class="envelope-text">TAP TO OPEN 💌</span></div>
+        </div>
+    </div>
+
+    <div id="all-sections-scroll-root">
+        
+        <div class="parallax-shape shape-1" data-speed="0.1"></div>
+        <div class="parallax-shape shape-2" data-speed="-0.15"></div>
+        <div class="parallax-shape shape-3" data-speed="0.05"></div>
+
+        <div id="main-content">
+            
+            <div id="phase-1-sections">
+                <div class="section">
+                    <div class="glass-box" style="background: transparent; border: none; box-shadow: none;">
+                        <span class="date-label">April 10, 2026</span>
+                        <h1>Happy Last Day!</h1>
+                        <p style="max-width: 600px; margin: 0 auto;">Before you close your laptop and officially leave us, let's take a quick look back.</p>
+                        <div style="margin-top: 50px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">Scroll down ↓</div>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <div class="glass-box interactable-area">
+                        <span class="date-label">The Journey</span>
+                        <h2>A Timeline of Chaos & Success</h2>
+                        
+                        <div class="slider-container">
+                            <div class="slide-instruction">Slide to the right 👉</div>
+                            <input type="range" id="timeline-slider" class="interactable" min="0" max="6" step="1" value="0">
+                            <div id="slider-date">January 2025</div>
+                            <div id="slider-text">I joined the team. You stepped in and started teaching me the core concepts of the Supply Chain.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="phase-2-sections">
+                <div class="section" id="apology-section">
+                    <div class="glass-box">
+                        <span class="date-label">A Formal Apology</span>
+                        <h2>The Ladder Files</h2>
+                        <p>I would also like to officially apologize for the times I constantly poked you asking if the ladder files for <span class="highlight">Focus Camera</span>, <span class="highlight">Game Stop</span>, and <span class="highlight">Micro Center</span> were ready for me to upload. 😅</p>
+                        <p>Thank you for your endless patience!</p>
+                    </div>
+                </div>
+
+                <div class="section" id="eval-intro-section">
+                    <div class="glass-box">
+                        <span class="accent-script">The Real Test</span>
+                        <h2>Time for your Evaluation</h2>
+                        <p>We've looked at the past. Now it's time to see if you actually did your job before we let you leave.</p>
+                        <button class="action-btn interactable" id="start-eval-btn">Start the Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="game-1-section">
+                <div class="glass-box interactable-area">
+                    <span class="date-label">Step 1: Mentorship Verification</span>
+                    <h2>Confirm Training</h2>
+                    <p style="margin-bottom: 20px;">Please verify the modules you successfully taught and work done by me.</p>
+                    
+                    <div class="switch-row"><span class="switch-label">1. Supply Chain basics KT completed?</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">2. Forecast logic & Ladders file understood?</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">3. S&OE file explained perfectly?</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">4. Explained - How to work with Kinaxis?</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">5. New Kinaxis templates created for different accounts?</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">6. I built the Tableau dashboard for you?</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">7. I fixed some Excel formulas for you? 😉</span><div class="toggle-switch interactable sw-req"></div></div>
+                    <div class="switch-row"><span class="switch-label">8. 100% Wednesday Sync Attendance?</span><div class="toggle-switch interactable sw-trick" id="sw-8"></div></div>
+                    
+                    <div id="joke-message">Nice try. We both know I missed a few of those.<br>System overriding...</div>
+                </div>
+            </div>
+
+            <div class="section" id="game-2-section">
+                <div class="glass-box">
+                    <span class="date-label">Step 2: Security Protocol</span>
+                    <h2>Clear My Record</h2>
+                    <p>Since the system flagged my sync attendance, please catch and delete my excuses before you are granted access to your final review.</p>
+                    
+                    <div id="game-board">
+                        <div class="excuse-bubble interactable" id="ex-1">"Power Outage! 🔌"</div>
+                        <div class="excuse-bubble interactable" id="ex-2">"Calendar Glitch! 🗓️"</div>
+                        <div class="excuse-bubble interactable" id="ex-3">"I literally forgot... 🤦‍♂️"</div>
+                        <div class="excuse-bubble interactable" id="ex-4">"Time zone confusion! 🌍"</div>
+
+                        <div id="game-overlay">
+                            <h2 style="color: var(--accent); margin-bottom: 5px;">Records Cleared!</h2>
+                            <p style="margin:0;">Unlocking Final Assessment...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section" id="finale-section">
+                <div class="glass-box" style="padding-bottom: 30px;">
+                    <span class="accent-script">The Moment of Truth</span>
+                    <h2>Your Final Review</h2>
+                    <p>Based on your entire tenure as my manager, it is time to submit your final official rating.</p>
+                    
+                    <p style="font-size: 0.9rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-top: 25px;">👉 Select the most accurate representation below:</p>
+                    
+                    <div id="playground">
+                        <div class="button-stack">
+                            <button class="btn interactable" id="good-btn">You were an AMAZING Manager ✨</button>
+                            <button class="btn interactable" id="bad-btn">Submit Review: Bad Manager</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div> <div id="final-message">
+        <div class="final-content-wrapper">
+            
+            <span class="accent-script" style="font-size: 5rem; margin-bottom: 10px;">Obviously.</span>
+            <h1 style="font-size: clamp(2rem, 4vw, 3rem); max-width: 800px; padding: 0 20px; line-height: 1.2;">You are the absolute best.</h1>
+            
+            <p style="max-width: 650px; margin-top: 20px; font-size: 1.2rem;">Seriously though, thank you for the endless support, the Wednesday laughs, and for genuinely being an incredible mentor. You made navigating the chaos look easy.</p>
+            
+            <p style="max-width: 650px; margin-top: 15px; font-size: 1.2rem;">I'm still mildly offended you're leaving, but I guess I'll allow it. Go absolutely kill it at the new company—they have no idea how lucky they are to get you.</p>
+            
+            <p style="font-weight: 700; color: var(--text-dark); margin-top: 30px; font-size: 1.3rem;">Don't be a stranger, and let's definitely work together again in the future. All the best! 🥂❤️</p>
+
+            <div class="footer-credits">
+                <div class="social-links">
+                    
+                    <div class="social-icon-wrapper">
+                        <button class="social-icon interactable" id="email-btn" title="Email">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </button>
+                        <div class="callout" id="email-callout">
+                            <a href="mailto:vipul7008@gmail.com" class="interactable">vipul7008@gmail.com</a>
+                            <a href="mailto:vipulsharma789@gmail.com" class="interactable">vipulsharma789@gmail.com</a>
+                        </div>
+                    </div>
+                    
+                    <a href="https://www.linkedin.com/in/vipulshm" class="social-icon interactable" target="_blank" title="LinkedIn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                            <rect x="2" y="9" width="4" height="12"></rect>
+                            <circle cx="4" cy="4" r="2"></circle>
+                        </svg>
+                    </a>
+
+                    <div class="social-icon-wrapper">
+                        <button class="social-icon interactable" id="phone-btn" title="Phone">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </button>
+                        <div class="callout" id="phone-callout">
+                            <a href="tel:+918149582542" class="interactable">+91 81495 82542</a>
+                            <a href="tel:+919730699971" class="interactable">+91 97306 99971</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <span class="aesthetic-signature">Made by Vipul with ❤️</span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- 0. AMBIENT GLITTER DUST ---
+        const glitterContainer = document.getElementById('glitter-container');
+        const particleCount = window.innerWidth < 768 ? 20 : 50; 
+        for (let i = 0; i < particleCount; i++) {
+            let glitter = document.createElement('div');
+            glitter.className = 'glitter';
+            let size = Math.random() * 4 + 2; 
+            glitter.style.width = `${size}px`;
+            glitter.style.height = `${size}px`;
+            glitter.style.left = `${Math.random() * 100}vw`;
+            glitter.style.animationDuration = `${Math.random() * 15 + 10}s`; 
+            glitter.style.animationDelay = `${Math.random() * 10}s`;
+            glitterContainer.appendChild(glitter);
+        }
+
+        // --- 1. CUSTOM CURSOR LOGIC ---
+        const dot = document.getElementById('cursor-dot');
+        const outline = document.getElementById('cursor-outline');
+        
+        window.addEventListener('mousemove', (e) => {
+            dot.style.left = `${e.clientX}px`; dot.style.top = `${e.clientY}px`;
+            setTimeout(() => { outline.style.left = `${e.clientX}px`; outline.style.top = `${e.clientY}px`; }, 40);
+        });
+
+        document.body.addEventListener('mouseover', (e) => {
+            if (e.target.closest('.interactable') || e.target.closest('.btn') || e.target.closest('.action-btn') || e.target.closest('.social-icon')) {
+                document.body.classList.add('cursor-hover');
+            } else {
+                document.body.classList.remove('cursor-hover');
+            }
+        });
+
+        // --- 2. ENVELOPE INTRO ---
+        document.getElementById('envelope-btn').addEventListener('click', () => {
+            confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: ['#D4A373', '#FAEDCD', '#2A2A2A'] });
+            document.getElementById('intro-screen').style.opacity = '0';
+            
+            setTimeout(() => {
+                document.getElementById('intro-screen').style.display = 'none';
+                const main = document.getElementById('main-content');
+                main.style.display = 'block';
+                
+                // NO LONGER RESETS SCROLL HERE. Root handles initial view.
+                
+                requestAnimationFrame(() => {
+                    main.style.opacity = '1';
+                    // Apply intersection observer within root
+                    document.querySelectorAll('.section').forEach(sec => observer.observe(sec));
+                });
+            }, 1000);
+        });
+
+        // Updated Intersection Observer for root
+        const scrollRoot = document.getElementById('all-sections-scroll-root');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+        }, { threshold: 0.2, root: scrollRoot }); // Fix: Observe within root
+
+        // --- 3. PARALLAX ONLY ON BACKGROUND BLOBS ---
+        const parallaxElements = document.querySelectorAll('.parallax-shape');
+        scrollRoot.addEventListener('scroll', () => { // Fix: Listen to root scroll
+            const y = scrollRoot.scrollTop;
+            parallaxElements.forEach(el => { el.style.transform = `translateY(${y * el.getAttribute('data-speed')}px)`; });
+        });
+
+        // --- 4. TIMELINE SLIDER LOGIC (Gatekeeper for Phase 2) ---
+        const slider = document.getElementById('timeline-slider');
+        const sDate = document.getElementById('slider-date');
+        const sText = document.getElementById('slider-text');
+        let phase2Unlocked = false;
+
+        const timelineData = [
+            { date: "January 2025", color: "var(--text-dark)", text: "I joined the team. You stepped in and started teaching me the core concepts of the Supply Chain." },
+            { date: "For first 2 months", color: "var(--text-dark)", text: "We were fighting with the IT team to give me all the necessary accesses. (They responded SO slowly)." },
+            { date: "The Laptop Struggle", color: "var(--text-dark)", text: "I started complaining about my slow laptop. You fought to get me a new one! (Spoiler: I never got it 😂)." },
+            { date: "Dashboard Era", color: "var(--text-dark)", text: "You fought IT for my Tableau Creator license, and we worked on the Sales vs Forecast dashboard." },
+            { date: "Kinaxis Implementation", color: "var(--text-dark)", text: "Kinaxis implementation started. Thank you for the KT sessions and working on the ladder templates together." },
+            { date: "March 26 2026", color: "var(--text-dark)", text: "I got the news about you leaving the company. Heartbreaking." },
+            { date: "April 10, 2026", color: "#e63946", text: "Today is the day you leave. (But not before finishing this review)." }
+        ];
+
+        slider.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value);
+            sDate.innerText = timelineData[val].date;
+            sDate.style.color = timelineData[val].color;
+            sText.innerText = timelineData[val].text;
+
+            // UNLOCK PHASE 2 
+            if (val === 6 && !phase2Unlocked) {
+                phase2Unlocked = true;
+                const phase2 = document.getElementById('phase-2-sections');
+                phase2.style.display = 'flex';
+                setTimeout(() => {
+                    phase2.style.opacity = '1';
+                }, 150);
+            }
+        });
+
+        // --- 5. EVALUATION BUTTON LOGIC (Gatekeeper for Phase 3) ---
+        document.getElementById('start-eval-btn').addEventListener('click', () => {
+            const game1 = document.getElementById('game-1-section');
+            game1.style.display = 'flex';
+            setTimeout(() => {
+                game1.style.opacity = '1';
+                game1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        });
+
+        // --- 6. GAME 1: THE SWITCHES & SLOWER JOKE ---
+        const standardSwitches = document.querySelectorAll('.sw-req');
+        let switchesState = Array(7).fill(false); 
+        let trickSwitchOn = false; 
+
+        function checkSwitches() {
+            let allStandardOn = switchesState.every(Boolean);
+            if (allStandardOn && trickSwitchOn) {
+                const game2 = document.getElementById('game-2-section');
+                game2.style.display = 'flex';
+                setTimeout(() => { game2.style.opacity = '1'; game2.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+            }
+        }
+
+        standardSwitches.forEach((sw, index) => {
+            sw.addEventListener('click', function() {
+                this.classList.toggle('active');
+                switchesState[index] = this.classList.contains('active');
+                checkSwitches();
+            });
+        });
+        
+        document.getElementById('sw-8').addEventListener('click', function() { 
+            this.classList.add('active'); 
+            setTimeout(() => {
+                this.classList.remove('active');
+                document.getElementById('joke-message').style.opacity = '1';
+                setTimeout(() => { trickSwitchOn = true; checkSwitches(); }, 3500);
+            }, 800);
+        });
+
+        // --- 7. GAME 2: EXCUSE CATCHER ---
+        const bubbles = document.querySelectorAll('.excuse-bubble');
+        const board = document.getElementById('game-board');
+        let caught = 0;
+
+        function moveBubble(bubble) {
+            if(bubble.style.display === 'none') return;
+            const x = Math.random() * (board.offsetWidth - 180);
+            const y = Math.random() * (board.offsetHeight - 50);
+            bubble.style.transition = 'all 1.5s ease-in-out';
+            bubble.style.transform = `translate(${x}px, ${y}px)`;
+            setTimeout(() => moveBubble(bubble), 1500);
+        }
+
+        bubbles.forEach((bubble, index) => {
+            bubble.style.top = '0'; bubble.style.left = '0';
+            setTimeout(() => moveBubble(bubble), index * 500);
+
+            bubble.addEventListener('click', function() {
+                this.style.display = 'none'; caught++;
+                confetti({ particleCount: 30, spread: 50, origin: { x: (this.getBoundingClientRect().left / window.innerWidth), y: (this.getBoundingClientRect().top / window.innerHeight) }, colors: ['#D4A373'] });
+                
+                if (caught === 4) {
+                    document.getElementById('game-overlay').style.display = 'flex';
+                    setTimeout(() => {
+                        const finale = document.getElementById('finale-section');
+                        finale.style.display = 'flex';
+                        setTimeout(() => { finale.style.opacity = '1'; finale.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
+                    }, 1500);
+                }
+            });
+        });
+
+        // --- 8. THE CHASE FINALE (5 HOVERS TO UNLOCK) ---
+        const badBtn = document.getElementById('bad-btn');
+        const goodBtn = document.getElementById('good-btn');
+        const playground = document.getElementById('playground');
+        const stackContainer = document.querySelector('.button-stack');
+        let isDetached = false;
+        
+        let chaseCount = 0;
+        const chaseTexts = [
+            "Try catching me first! 🏃‍♀️",
+            "Getting closer... 🕵️‍♀️",
+            "Almost there! ⏳",
+            "One last time! 🎯",
+            "Okay, fine. You win. 🏳️"
+        ];
+
+        badBtn.addEventListener('mouseenter', (e) => {
+            if (chaseCount >= 5) return; 
+
+            badBtn.innerText = chaseTexts[chaseCount];
+            chaseCount++;
+
+            if (!isDetached) {
+                const rect = badBtn.getBoundingClientRect();
+                const playRect = playground.getBoundingClientRect();
+                
+                badBtn.style.width = 'max-content';
+                badBtn.style.padding = '12px 28px';
+                badBtn.style.height = 'auto';
+
+                playground.appendChild(badBtn); 
+                isDetached = true;
+                
+                badBtn.style.left = (rect.left - playRect.left) + 'px';
+                badBtn.style.top = (rect.top - playRect.top) + 'px';
+            }
+            
+            if (chaseCount < 5) {
+                setTimeout(() => triggerJump(e), 10);
+            } else {
+                // Game Beaten!
+                badBtn.style.left = '20px';
+                badBtn.style.top = '20px';
+                badBtn.style.cursor = 'default';
+                badBtn.style.transform = 'scale(0.9)';
+                badBtn.style.opacity = '0.5';
+                
+                setTimeout(() => {
+                    goodBtn.classList.add('revealed');
+                    confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 }, colors: ['#D4A373', '#FAEDCD'] });
+                }, 300);
+            }
+        });
+
+        function triggerJump(e) {
+            const playRect = playground.getBoundingClientRect();
+            const stackRect = stackContainer.getBoundingClientRect();
+            
+            let mouseX = e.clientX - playRect.left;
+            let mouseY = e.clientY - playRect.top;
+
+            const badW = badBtn.offsetWidth;
+            const badH = badBtn.offsetHeight;
+            let pad = 20;
+            let minX, maxX, minY, maxY;
+
+            if (mouseX < playRect.width / 2) {
+                minX = (playRect.width / 2) + pad; maxX = playRect.width - badW - pad;
+            } else {
+                minX = pad; maxX = (playRect.width / 2) - badW - pad;
+            }
+
+            if (mouseY < playRect.height / 2) {
+                minY = (playRect.height / 2) + pad; maxY = playRect.height - badH - pad;
+            } else {
+                minY = pad; maxY = (playRect.height / 2) - badH - pad;
+            }
+
+            let newX = minX + Math.random() * (maxX - minX);
+            let newY = minY + Math.random() * (maxY - minY);
+
+            let absX = playRect.left + newX;
+            let absY = playRect.top + newY;
+            let buffer = 15; 
+            
+            let overlapsStack = !(
+                (absX + badW < stackRect.left - buffer) || 
+                (absX > stackRect.right + buffer) || 
+                (absY + badH < stackRect.top - buffer) || 
+                (absY > stackRect.bottom + buffer)
+            );
+
+            if (overlapsStack) {
+                newY = (newY > playRect.height / 2) ? playRect.height - badH - pad : pad;
+            }
+
+            badBtn.style.left = newX + 'px';
+            badBtn.style.top = newY + 'px';
+        }
+
+        // --- 9. MAGNETIC GOOD BUTTON ---
+        stackContainer.addEventListener('mousemove', (e) => {
+            if (chaseCount < 5) return; 
+
+            const rect = goodBtn.getBoundingClientRect();
+            const btnX = rect.left + rect.width / 2;
+            const btnY = rect.top + rect.height / 2;
+            const dx = e.clientX - btnX; const dy = e.clientY - btnY;
+
+            if (Math.hypot(dx, dy) < 150) {
+                goodBtn.style.transform = `translate(${dx * 0.15}px, ${dy * 0.15}px) scale(1.05)`;
+                // Keep text white when magnetic
+                goodBtn.style.color = '#fff';
+            } else {
+                goodBtn.style.transform = `translate(0px, 0px) scale(1)`;
+                goodBtn.style.color = '#fff';
+            }
+        });
+        stackContainer.addEventListener('mouseleave', () => { 
+            if (chaseCount >= 5) {
+                goodBtn.style.transform = `translate(0px, 0px) scale(1)`; 
+            }
+        });
+
+        // --- 10. FINAL CELEBRATION & SCROLL LOCK ---
+        const finalMsg = document.getElementById('final-message');
+        goodBtn.addEventListener('click', () => {
+            badBtn.style.display = 'none';
+            
+            // Fix: Completely hide the underlying webpage scroll context
+            document.getElementById('all-sections-scroll-root').style.display = 'none';
+
+            finalMsg.style.display = 'block';
+            setTimeout(() => { finalMsg.classList.add('show'); }, 10);
+
+            let duration = 6 * 1000;
+            let end = Date.now() + duration;
+            let colors = ['#D4A373', '#FAEDCD', '#2A2A2A'];
+
+            (function frame() {
+                confetti({ particleCount: 8, angle: 60, spread: 55, origin: { x: 0 }, colors: colors, zIndex: 9999 });
+                confetti({ particleCount: 8, angle: 120, spread: 55, origin: { x: 1 }, colors: colors, zIndex: 9999 });
+                if (Date.now() < end) { requestAnimationFrame(frame); }
+            }());
+            
+            setTimeout(() => { confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: colors, zIndex: 9999 }); }, 500);
+        });
+
+        // --- 11. CALLOUT LOGIC FOR FOOTER ICONS ---
+        const emailBtn = document.getElementById('email-btn');
+        const emailCallout = document.getElementById('email-callout');
+        const phoneBtn = document.getElementById('phone-btn');
+        const phoneCallout = document.getElementById('phone-callout');
+
+        function hideAllCallouts() {
+            emailCallout.classList.remove('show');
+            emailBtn.classList.remove('active');
+            phoneCallout.classList.remove('show');
+            phoneBtn.classList.remove('active');
+        }
+
+        emailBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isShowing = emailCallout.classList.contains('show');
+            hideAllCallouts();
+            if (!isShowing) {
+                emailCallout.classList.add('show');
+                emailBtn.classList.add('active');
+            }
+        });
+
+        phoneBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isShowing = phoneCallout.classList.contains('show');
+            hideAllCallouts();
+            if (!isShowing) {
+                phoneCallout.classList.add('show');
+                phoneBtn.classList.add('active');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.social-icon-wrapper')) {
+                hideAllCallouts();
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -147,22 +147,12 @@
         /* --- THE BAIT & SWITCH FINALE ARENA --- */
         #playground { position: relative; width: 100%; height: 450px; margin-top: 20px; background: transparent; overflow: hidden; border-radius: 20px; }
         .button-stack { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; height: 70px; }
-        
-        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
+        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; border: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
 
-        /* Updated Buttons to Grab Attention */
-        #bad-btn { 
-            background: var(--text-dark); color: #fff; border: none; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: absolute; top: 0; left: 0; z-index: 10; 
-            transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.3s; 
-        }
-
-        #good-btn { 
-            background: var(--accent); color: #fff; box-shadow: 0 15px 35px rgba(212, 163, 115, 0.4); 
-            border: none; position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transform: scale(0.5); 
-            pointer-events: none; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
-        }
+        #good-btn { background: var(--text-dark); color: #fff; box-shadow: 0 15px 30px rgba(0,0,0,0.2); position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transform: scale(0.5); pointer-events: none; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         #good-btn.revealed { opacity: 1; transform: scale(1); pointer-events: all; }
+        
+        #bad-btn { background: #fff; color: var(--text-dark); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 10px 20px rgba(0,0,0,0.05); position: absolute; top: 0; left: 0; z-index: 10; transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.3s; }
 
         /* --- FINAL REVEAL OVERLAY & SCROLL FIX --- */
         #final-message { 
@@ -172,9 +162,16 @@
         }
         #final-message.show { opacity: 1; }
 
+        /* DEDICATED CONFETTI CANVAS - GUARANTEES VISIBILITY OVER BLUR */
+        #finale-confetti-canvas {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 99999;
+        }
+
         .final-content-wrapper {
             display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
             min-height: 100%; width: 100%; padding: 10vh 20px 40px 20px; text-align: center;
+            position: relative; z-index: 2;
         }
 
         /* --- FOOTER & AESTHETIC CALLOUTS --- */
@@ -203,7 +200,7 @@
         }
         .callout.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
         .callout::after { content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: rgba(255, 255, 255, 0.95); border-right: 1px solid var(--accent); border-bottom: 1px solid var(--accent); }
-        .callout a { color: var(--text-dark); text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.3px; transition: color 0.2s; cursor: none; }
+        .callout a { color: var(--text-dark); text-decoration: none; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.3px; transition: color 0.2s; cursor: none; display: flex; align-items: center; gap: 8px; }
         .callout a:hover { color: var(--accent); }
 
         .aesthetic-signature { font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 2px; margin-top: 5px; }
@@ -340,6 +337,8 @@
         </div>
 
     </div> <div id="final-message">
+        <canvas id="finale-confetti-canvas"></canvas>
+
         <div class="final-content-wrapper">
             
             <span class="accent-script" style="font-size: 5rem; margin-bottom: 10px;">Obviously.</span>
@@ -429,7 +428,8 @@
 
         // --- 2. ENVELOPE INTRO ---
         document.getElementById('envelope-btn').addEventListener('click', () => {
-            confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 }, colors: ['#D4A373', '#FAEDCD', '#2A2A2A'] });
+            // Updated to default rainbow colors for initial celebrate
+            confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
             document.getElementById('intro-screen').style.opacity = '0';
             
             setTimeout(() => {
@@ -437,30 +437,26 @@
                 const main = document.getElementById('main-content');
                 main.style.display = 'block';
                 
-                // NO LONGER RESETS SCROLL HERE. Root handles initial view.
-                
                 requestAnimationFrame(() => {
                     main.style.opacity = '1';
-                    // Apply intersection observer within root
                     document.querySelectorAll('.section').forEach(sec => observer.observe(sec));
                 });
             }, 1000);
         });
 
-        // Updated Intersection Observer for root
         const scrollRoot = document.getElementById('all-sections-scroll-root');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.2, root: scrollRoot }); // Fix: Observe within root
+        }, { threshold: 0.2, root: scrollRoot });
 
         // --- 3. PARALLAX ONLY ON BACKGROUND BLOBS ---
         const parallaxElements = document.querySelectorAll('.parallax-shape');
-        scrollRoot.addEventListener('scroll', () => { // Fix: Listen to root scroll
+        scrollRoot.addEventListener('scroll', () => { 
             const y = scrollRoot.scrollTop;
             parallaxElements.forEach(el => { el.style.transform = `translateY(${y * el.getAttribute('data-speed')}px)`; });
         });
 
-        // --- 4. TIMELINE SLIDER LOGIC (Gatekeeper for Phase 2) ---
+        // --- 4. TIMELINE SLIDER LOGIC ---
         const slider = document.getElementById('timeline-slider');
         const sDate = document.getElementById('slider-date');
         const sText = document.getElementById('slider-text');
@@ -482,7 +478,6 @@
             sDate.style.color = timelineData[val].color;
             sText.innerText = timelineData[val].text;
 
-            // UNLOCK PHASE 2 
             if (val === 6 && !phase2Unlocked) {
                 phase2Unlocked = true;
                 const phase2 = document.getElementById('phase-2-sections');
@@ -493,7 +488,7 @@
             }
         });
 
-        // --- 5. EVALUATION BUTTON LOGIC (Gatekeeper for Phase 3) ---
+        // --- 5. EVALUATION BUTTON LOGIC ---
         document.getElementById('start-eval-btn').addEventListener('click', () => {
             const game1 = document.getElementById('game-1-section');
             game1.style.display = 'flex';
@@ -554,7 +549,8 @@
 
             bubble.addEventListener('click', function() {
                 this.style.display = 'none'; caught++;
-                confetti({ particleCount: 30, spread: 50, origin: { x: (this.getBoundingClientRect().left / window.innerWidth), y: (this.getBoundingClientRect().top / window.innerHeight) }, colors: ['#D4A373'] });
+                // Updated to default rainbow colors
+                confetti({ particleCount: 30, spread: 50, origin: { x: (this.getBoundingClientRect().left / window.innerWidth), y: (this.getBoundingClientRect().top / window.innerHeight) } });
                 
                 if (caught === 4) {
                     document.getElementById('game-overlay').style.display = 'flex';
@@ -616,7 +612,8 @@
                 
                 setTimeout(() => {
                     goodBtn.classList.add('revealed');
-                    confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 }, colors: ['#D4A373', '#FAEDCD'] });
+                    // Updated to default rainbow colors
+                    confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
                 }, 300);
             }
         });
@@ -678,25 +675,30 @@
 
             if (Math.hypot(dx, dy) < 150) {
                 goodBtn.style.transform = `translate(${dx * 0.15}px, ${dy * 0.15}px) scale(1.05)`;
-                // Keep text white when magnetic
+                goodBtn.style.background = 'var(--accent)';
                 goodBtn.style.color = '#fff';
             } else {
                 goodBtn.style.transform = `translate(0px, 0px) scale(1)`;
-                goodBtn.style.color = '#fff';
+                goodBtn.style.background = 'var(--accent)';
             }
         });
         stackContainer.addEventListener('mouseleave', () => { 
             if (chaseCount >= 5) {
                 goodBtn.style.transform = `translate(0px, 0px) scale(1)`; 
+                goodBtn.style.background = 'var(--accent)';
             }
         });
 
-        // --- 10. FINAL CELEBRATION & SCROLL LOCK ---
+        // --- 9. FINAL CELEBRATION & GUARANTEED CONFETTI ---
         const finalMsg = document.getElementById('final-message');
+        
+        // Initialize custom confetti tied specifically to the final overlay canvas
+        const myCanvas = document.getElementById('finale-confetti-canvas');
+        const myConfetti = confetti.create(myCanvas, { resize: true, useWorker: true });
+
         goodBtn.addEventListener('click', () => {
             badBtn.style.display = 'none';
             
-            // Fix: Completely hide the underlying webpage scroll context
             document.getElementById('all-sections-scroll-root').style.display = 'none';
 
             finalMsg.style.display = 'block';
@@ -704,18 +706,20 @@
 
             let duration = 6 * 1000;
             let end = Date.now() + duration;
-            let colors = ['#D4A373', '#FAEDCD', '#2A2A2A'];
+            // REMOVED THEME COLOR RESTRICTION FOR FINALE
+
+            // Use the dedicated canvas confetti so it fires ON TOP of the blur
+            // pass NO colors to myConfetti calls to default to standard multi-color rainbow palette
+            setTimeout(() => { myConfetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } }); }, 100);
 
             (function frame() {
-                confetti({ particleCount: 8, angle: 60, spread: 55, origin: { x: 0 }, colors: colors, zIndex: 9999 });
-                confetti({ particleCount: 8, angle: 120, spread: 55, origin: { x: 1 }, colors: colors, zIndex: 9999 });
+                myConfetti({ particleCount: 15, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } });
+                myConfetti({ particleCount: 15, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } });
                 if (Date.now() < end) { requestAnimationFrame(frame); }
             }());
-            
-            setTimeout(() => { confetti({ particleCount: 200, spread: 120, origin: { y: 0.6 }, colors: colors, zIndex: 9999 }); }, 500);
         });
 
-        // --- 11. CALLOUT LOGIC FOR FOOTER ICONS ---
+        // --- 10. CALLOUT LOGIC FOR FOOTER ICONS ---
         const emailBtn = document.getElementById('email-btn');
         const emailCallout = document.getElementById('email-callout');
         const phoneBtn = document.getElementById('phone-btn');

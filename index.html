@@ -20,23 +20,17 @@
             --glass-border: rgba(255, 255, 255, 0.9);
         }
 
-        body::after {
-            content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('data:image/svg+xml;utf8,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)" opacity="0.04"/%3E%3C/svg%3E');
-            pointer-events: none; z-index: 9999;
+        /* NATIVE, BUTTERY SMOOTH SCROLLING */
+        html {
+            /* Force scrollbar to prevent the card from "jumping" when new content appears */
+            overflow-y: scroll; 
+            overflow-x: hidden;
+            scroll-behavior: smooth;
         }
 
-        /* PERMANENTLY HIDE BROWSER WINDOW SCROLLBAR */
-        body, html {
+        body {
             margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-dark);
-            font-family: 'Inter', sans-serif; overflow: hidden; 
-            cursor: none; width: 100%; height: 100%;
-        }
-
-        /* --- THE NEW SINGLE SCROLL ROOT --- */
-        #all-sections-scroll-root {
-            width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;
-            scroll-behavior: smooth; position: relative; z-index: 5;
+            font-family: 'Inter', sans-serif; cursor: none; width: 100%; height: 100%;
         }
 
         /* --- CUSTOM FLUID CURSOR --- */
@@ -58,13 +52,13 @@
         #intro-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 5000;
-            transition: opacity 1s cubic-bezier(0.8, 0, 0.2, 1); text-align: center; padding: 0 20px;
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1); text-align: center; padding: 0 20px;
         }
         
-        .fade-up-1 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 0.5s; }
-        .fade-up-2 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 1.8s; }
-        .fade-up-3 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 3.2s; }
-        .fade-up-4 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards 4.8s; }
+        .fade-up-1 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 0.5s; }
+        .fade-up-2 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 1.8s; }
+        .fade-up-3 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 3.2s; }
+        .fade-up-4 { opacity: 0; animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards 4.8s; }
 
         @keyframes fadeUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
         @keyframes pulseGlow { 0%, 100% { box-shadow: 0 10px 30px rgba(212, 163, 115, 0.2); } 50% { box-shadow: 0 15px 50px rgba(212, 163, 115, 0.6); } }
@@ -74,21 +68,24 @@
             width: 260px; height: 170px; background: var(--glass-bg); border: 1px solid var(--accent);
             border-radius: 12px; position: relative; backdrop-filter: blur(20px);
             display: flex; justify-content: center; align-items: center;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); margin: 0 auto; cursor: none;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); margin: 0 auto; cursor: none;
             animation: pulseGlow 2.5s infinite; 
         }
         .envelope:hover { transform: scale(1.05) translateY(-10px); border-color: var(--accent); }
         .envelope-text { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--text-dark); letter-spacing: 1px; }
 
-        /* --- CONTENT WRAPPER INSIDE THE SCROLL ROOT --- */
-        #main-content { display: none; opacity: 0; width: 100%; margin: 0 auto; position: relative; z-index: 10; }
+        /* --- CONTENT WRAPPER --- */
+        #main-content { display: none; opacity: 0; width: 100%; margin: 0 auto; position: relative; z-index: 10; padding-bottom: 100px; }
         
+        /* APPLE-STYLE SMOOTH REVEAL TRANSITIONS */
         .section { 
-            min-height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; 
-            position: relative; opacity: 0; transform: translateY(60px); 
-            transition: all 1.2s cubic-bezier(0.2, 0.8, 0.2, 1); padding: 40px 20px;
+            min-height: 80vh; /* Reduced from 100vh so user doesn't have to scroll as far */
+            width: 100%; display: flex; align-items: center; justify-content: center; 
+            position: relative; opacity: 0; transform: translateY(40px) scale(0.98); 
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1); 
+            padding: 40px 20px;
         }
-        .section.visible { opacity: 1; transform: translateY(0); }
+        .section.visible { opacity: 1; transform: translateY(0) scale(1); }
 
         .glass-box { 
             background: var(--glass-bg); border: 1px solid var(--glass-border); 
@@ -124,7 +121,8 @@
         #slider-text { font-size: 1.1rem; color: var(--text-muted); min-height: 80px; margin-top: 10px; transition: 0.3s; padding: 0 20px;}
 
         /* --- DYNAMIC SECTIONS --- */
-        #phase-2-sections, #game-1-section, #game-2-section, #finale-section { display: none; opacity: 0; transition: opacity 1s ease; flex-direction: column; width: 100%; }
+        #phase-2-sections { display: none; opacity: 0; transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1); width: 100%; }
+        #game-1-section, #game-2-section, #finale-section { display: none; }
 
         /* --- GAME 1: THE SWITCHES --- */
         .switch-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(0,0,0,0.03); text-align: left;}
@@ -147,22 +145,23 @@
         /* --- THE BAIT & SWITCH FINALE ARENA --- */
         #playground { position: relative; width: 100%; height: 450px; margin-top: 20px; background: transparent; overflow: hidden; border-radius: 20px; }
         .button-stack { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 450px; height: 70px; }
-        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; border: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
+        .btn { font-family: 'Syne', sans-serif; font-size: 1.15rem; width: 100%; height: 100%; border-radius: 50px; cursor: none; font-weight: 700; outline: none; display: flex; justify-content: center; align-items: center; white-space: nowrap; padding: 0 40px; box-sizing: border-box; }
 
-        #good-btn { background: var(--text-dark); color: #fff; box-shadow: 0 15px 30px rgba(0,0,0,0.2); position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transform: scale(0.5); pointer-events: none; transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        #good-btn { background: var(--accent); color: #fff; box-shadow: 0 15px 30px rgba(212, 163, 115, 0.4); border: none; position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transform: scale(0.5); pointer-events: none; transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
         #good-btn.revealed { opacity: 1; transform: scale(1); pointer-events: all; }
         
-        #bad-btn { background: #fff; color: var(--text-dark); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 10px 20px rgba(0,0,0,0.05); position: absolute; top: 0; left: 0; z-index: 10; transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.3s; }
+        #bad-btn { background: var(--text-dark); color: #fff; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.2); position: absolute; top: 0; left: 0; z-index: 10; transition: left 0.15s ease-out, top 0.15s ease-out, transform 0.3s; }
 
         /* --- FINAL REVEAL OVERLAY & SCROLL FIX --- */
         #final-message { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(253, 251, 249, 0.98); backdrop-filter: blur(25px); z-index: 9000; 
-            opacity: 0; transition: opacity 1s ease; overflow-y: auto; 
+            background: rgba(253, 251, 249, 0.98); 
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            z-index: 9000; opacity: 0; transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1); overflow-y: auto; 
         }
         #final-message.show { opacity: 1; }
 
-        /* DEDICATED CONFETTI CANVAS - GUARANTEES VISIBILITY OVER BLUR */
+        /* DEDICATED CONFETTI CANVAS */
         #finale-confetti-canvas {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none; z-index: 99999;
@@ -195,7 +194,7 @@
             position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%) translateY(10px);
             background: rgba(255, 255, 255, 0.95); border: 1px solid var(--accent); backdrop-filter: blur(15px);
             padding: 10px 16px; border-radius: 8px; display: flex; flex-direction: column; gap: 10px;
-            opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             box-shadow: 0 8px 20px rgba(0,0,0,0.08); white-space: nowrap; z-index: 9999;
         }
         .callout.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
@@ -214,6 +213,10 @@
     <div id="cursor-dot"></div>
     <div id="cursor-outline"></div>
 
+    <div class="parallax-shape shape-1" data-speed="0.1"></div>
+    <div class="parallax-shape shape-2" data-speed="-0.15"></div>
+    <div class="parallax-shape shape-3" data-speed="0.05"></div>
+
     <div id="intro-screen">
         <h1 class="fade-up-1" style="font-family: 'Caveat', cursive; font-size: 5.5rem; color: var(--accent); margin-bottom: 20px;">Hi Natalie,</h1>
         <h2 class="fade-up-2" style="font-size: 1.8rem; font-weight: 600; margin-bottom: 25px;">Today is your last day.</h2>
@@ -226,111 +229,104 @@
         </div>
     </div>
 
-    <div id="all-sections-scroll-root">
-        
-        <div class="parallax-shape shape-1" data-speed="0.1"></div>
-        <div class="parallax-shape shape-2" data-speed="-0.15"></div>
-        <div class="parallax-shape shape-3" data-speed="0.05"></div>
+    <div id="main-content">
 
-        <div id="main-content">
-            
-            <div id="phase-1-sections">
-                <div class="section">
-                    <div class="glass-box" style="background: transparent; border: none; box-shadow: none;">
-                        <span class="date-label">April 10, 2026</span>
-                        <h1>Happy Last Day!</h1>
-                        <p style="max-width: 600px; margin: 0 auto;">Before you close your laptop and officially leave us, let's take a quick look back.</p>
-                        <div style="margin-top: 50px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">Scroll down ↓</div>
-                    </div>
-                </div>
-
-                <div class="section">
-                    <div class="glass-box interactable-area">
-                        <span class="date-label">The Journey</span>
-                        <h2>A Timeline of Chaos & Success</h2>
-                        
-                        <div class="slider-container">
-                            <div class="slide-instruction">Slide to the right 👉</div>
-                            <input type="range" id="timeline-slider" class="interactable" min="0" max="6" step="1" value="0">
-                            <div id="slider-date">January 2025</div>
-                            <div id="slider-text">I joined the team. You stepped in and started teaching me the core concepts of the Supply Chain.</div>
-                        </div>
-                    </div>
+        <div id="phase-1-sections">
+            <div class="section">
+                <div class="glass-box" style="background: transparent; border: none; box-shadow: none;">
+                    <span class="date-label">April 10, 2026</span>
+                    <h1>Happy Last Day!</h1>
+                    <p style="max-width: 600px; margin: 0 auto;">Before you close your laptop and officially leave us, let's take a quick look back.</p>
+                    <div style="margin-top: 50px; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px;">Scroll down ↓</div>
                 </div>
             </div>
 
-            <div id="phase-2-sections">
-                <div class="section" id="apology-section">
-                    <div class="glass-box">
-                        <span class="date-label">A Formal Apology</span>
-                        <h2>The Ladder Files</h2>
-                        <p>I would also like to officially apologize for the times I constantly poked you asking if the ladder files for <span class="highlight">Focus Camera</span>, <span class="highlight">Game Stop</span>, and <span class="highlight">Micro Center</span> were ready for me to upload. 😅</p>
-                        <p>Thank you for your endless patience!</p>
-                    </div>
-                </div>
-
-                <div class="section" id="eval-intro-section">
-                    <div class="glass-box">
-                        <span class="accent-script">The Real Test</span>
-                        <h2>Time for your Evaluation</h2>
-                        <p>We've looked at the past. Now it's time to see if you actually did your job before we let you leave.</p>
-                        <button class="action-btn interactable" id="start-eval-btn">Start the Review</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="section" id="game-1-section">
+            <div class="section">
                 <div class="glass-box interactable-area">
-                    <span class="date-label">Step 1: Mentorship Verification</span>
-                    <h2>Confirm Training</h2>
-                    <p style="margin-bottom: 20px;">Please verify the modules you successfully taught and work done by me.</p>
+                    <span class="date-label">The Journey</span>
+                    <h2>A Timeline of Chaos & Success</h2>
                     
-                    <div class="switch-row"><span class="switch-label">1. Supply Chain basics KT completed?</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">2. Forecast logic & Ladders file understood?</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">3. S&OE file explained perfectly?</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">4. Explained - How to work with Kinaxis?</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">5. New Kinaxis templates created for different accounts?</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">6. I built the Tableau dashboard for you?</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">7. I fixed some Excel formulas for you? 😉</span><div class="toggle-switch interactable sw-req"></div></div>
-                    <div class="switch-row"><span class="switch-label">8. 100% Wednesday Sync Attendance?</span><div class="toggle-switch interactable sw-trick" id="sw-8"></div></div>
-                    
-                    <div id="joke-message">Nice try. We both know I missed a few of those.<br>System overriding...</div>
-                </div>
-            </div>
-
-            <div class="section" id="game-2-section">
-                <div class="glass-box">
-                    <span class="date-label">Step 2: Security Protocol</span>
-                    <h2>Clear My Record</h2>
-                    <p>Since the system flagged my sync attendance, please catch and delete my excuses before you are granted access to your final review.</p>
-                    
-                    <div id="game-board">
-                        <div class="excuse-bubble interactable" id="ex-1">"Power Outage! 🔌"</div>
-                        <div class="excuse-bubble interactable" id="ex-2">"Calendar Glitch! 🗓️"</div>
-                        <div class="excuse-bubble interactable" id="ex-3">"I literally forgot... 🤦‍♂️"</div>
-                        <div class="excuse-bubble interactable" id="ex-4">"Time zone confusion! 🌍"</div>
-
-                        <div id="game-overlay">
-                            <h2 style="color: var(--accent); margin-bottom: 5px;">Records Cleared!</h2>
-                            <p style="margin:0;">Unlocking Final Assessment...</p>
-                        </div>
+                    <div class="slider-container">
+                        <div class="slide-instruction">Slide to the right 👉</div>
+                        <input type="range" id="timeline-slider" class="interactable" min="0" max="6" step="1" value="0">
+                        <div id="slider-date">January 2025</div>
+                        <div id="slider-text">I joined the team. You stepped in and started teaching me the core concepts of the Supply Chain.</div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="section" id="finale-section">
-                <div class="glass-box" style="padding-bottom: 30px;">
-                    <span class="accent-script">The Moment of Truth</span>
-                    <h2>Your Final Review</h2>
-                    <p>Based on your entire tenure as my manager, it is time to submit your final official rating.</p>
-                    
-                    <p style="font-size: 0.9rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-top: 25px;">👉 Select the most accurate representation below:</p>
-                    
-                    <div id="playground">
-                        <div class="button-stack">
-                            <button class="btn interactable" id="good-btn">You were an AMAZING Manager ✨</button>
-                            <button class="btn interactable" id="bad-btn">Submit Review: Bad Manager</button>
-                        </div>
+        <div id="phase-2-sections">
+            <div class="section" id="apology-section">
+                <div class="glass-box">
+                    <span class="date-label">A Formal Apology</span>
+                    <h2>The Ladder Files</h2>
+                    <p>I would also like to officially apologize for the times I constantly poked you asking if the ladder files for <span class="highlight">Focus Camera</span>, <span class="highlight">Game Stop</span>, and <span class="highlight">Micro Center</span> were ready for me to upload. 😅</p>
+                    <p>Thank you for your endless patience!</p>
+                </div>
+            </div>
+
+            <div class="section" id="eval-intro-section">
+                <div class="glass-box">
+                    <span class="accent-script">The Real Test</span>
+                    <h2>Time for your Evaluation</h2>
+                    <p>We've looked at the past. Now it's time to see if you actually did your job before we let you leave.</p>
+                    <button class="action-btn interactable" id="start-eval-btn">Start the Review</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="game-1-section">
+            <div class="glass-box interactable-area">
+                <span class="date-label">Step 1: Mentorship Verification</span>
+                <h2>Confirm Training</h2>
+                <p style="margin-bottom: 20px;">Please verify the modules you successfully taught and work done by me.</p>
+                
+                <div class="switch-row"><span class="switch-label">1. Supply Chain basics KT completed?</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">2. Forecast logic & Ladders file understood?</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">3. S&OE file explained perfectly?</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">4. Explained - How to work with Kinaxis?</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">5. New Kinaxis templates created for different accounts?</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">6. I built the Tableau dashboard for you?</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">7. I fixed some Excel formulas for you? 😉</span><div class="toggle-switch interactable sw-req"></div></div>
+                <div class="switch-row"><span class="switch-label">8. 100% Wednesday Sync Attendance?</span><div class="toggle-switch interactable sw-trick" id="sw-8"></div></div>
+                
+                <div id="joke-message">Nice try. We both know I missed a few of those.<br>System overriding...</div>
+            </div>
+        </div>
+
+        <div class="section" id="game-2-section">
+            <div class="glass-box">
+                <span class="date-label">Step 2: Security Protocol</span>
+                <h2>Clear My Record</h2>
+                <p>Since the system flagged my sync attendance, please catch and delete my excuses before you are granted access to your final review.</p>
+                
+                <div id="game-board">
+                    <div class="excuse-bubble interactable" id="ex-1">"Power Outage! 🔌"</div>
+                    <div class="excuse-bubble interactable" id="ex-2">"Calendar Glitch! 🗓️"</div>
+                    <div class="excuse-bubble interactable" id="ex-3">"I literally forgot... 🤦‍♂️"</div>
+                    <div class="excuse-bubble interactable" id="ex-4">"Time zone confusion! 🌍"</div>
+
+                    <div id="game-overlay">
+                        <h2 style="color: var(--accent); margin-bottom: 5px;">Records Cleared!</h2>
+                        <p style="margin:0;">Unlocking Final Assessment...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="finale-section">
+            <div class="glass-box" style="padding-bottom: 30px;">
+                <span class="accent-script">The Moment of Truth</span>
+                <h2>Your Final Review</h2>
+                <p>Based on your entire tenure as my manager, it is time to submit your final official rating.</p>
+                
+                <p style="font-size: 0.9rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-top: 25px;">👉 Select the most accurate representation below:</p>
+                
+                <div id="playground">
+                    <div class="button-stack">
+                        <button class="btn interactable" id="good-btn">You were an AMAZING Manager ✨</button>
+                        <button class="btn interactable" id="bad-btn">Submit Review: Bad Manager</button>
                     </div>
                 </div>
             </div>
@@ -428,7 +424,6 @@
 
         // --- 2. ENVELOPE INTRO ---
         document.getElementById('envelope-btn').addEventListener('click', () => {
-            // Updated to default rainbow colors for initial celebrate
             confetti({ particleCount: 60, spread: 70, origin: { y: 0.6 } });
             document.getElementById('intro-screen').style.opacity = '0';
             
@@ -437,6 +432,8 @@
                 const main = document.getElementById('main-content');
                 main.style.display = 'block';
                 
+                window.scrollTo({ top: 0, behavior: 'instant' }); 
+                
                 requestAnimationFrame(() => {
                     main.style.opacity = '1';
                     document.querySelectorAll('.section').forEach(sec => observer.observe(sec));
@@ -444,15 +441,14 @@
             }, 1000);
         });
 
-        const scrollRoot = document.getElementById('all-sections-scroll-root');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-        }, { threshold: 0.2, root: scrollRoot });
+        }, { threshold: 0.2 });
 
         // --- 3. PARALLAX ONLY ON BACKGROUND BLOBS ---
         const parallaxElements = document.querySelectorAll('.parallax-shape');
-        scrollRoot.addEventListener('scroll', () => { 
-            const y = scrollRoot.scrollTop;
+        window.addEventListener('scroll', () => { 
+            const y = window.scrollY;
             parallaxElements.forEach(el => { el.style.transform = `translateY(${y * el.getAttribute('data-speed')}px)`; });
         });
 
@@ -478,13 +474,14 @@
             sDate.style.color = timelineData[val].color;
             sText.innerText = timelineData[val].text;
 
+            // UNLOCK PHASE 2 
             if (val === 6 && !phase2Unlocked) {
                 phase2Unlocked = true;
                 const phase2 = document.getElementById('phase-2-sections');
-                phase2.style.display = 'flex';
+                phase2.style.display = 'block'; 
                 setTimeout(() => {
                     phase2.style.opacity = '1';
-                }, 150);
+                }, 50);
             }
         });
 
@@ -495,7 +492,7 @@
             setTimeout(() => {
                 game1.style.opacity = '1';
                 game1.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
+            }, 50);
         });
 
         // --- 6. GAME 1: THE SWITCHES & SLOWER JOKE ---
@@ -508,7 +505,7 @@
             if (allStandardOn && trickSwitchOn) {
                 const game2 = document.getElementById('game-2-section');
                 game2.style.display = 'flex';
-                setTimeout(() => { game2.style.opacity = '1'; game2.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+                setTimeout(() => { game2.style.opacity = '1'; game2.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 50);
             }
         }
 
@@ -549,7 +546,6 @@
 
             bubble.addEventListener('click', function() {
                 this.style.display = 'none'; caught++;
-                // Updated to default rainbow colors
                 confetti({ particleCount: 30, spread: 50, origin: { x: (this.getBoundingClientRect().left / window.innerWidth), y: (this.getBoundingClientRect().top / window.innerHeight) } });
                 
                 if (caught === 4) {
@@ -563,7 +559,7 @@
             });
         });
 
-        // --- 8. THE CHASE FINALE (5 HOVERS TO UNLOCK) ---
+        // --- 8. THE CHASE FINALE ---
         const badBtn = document.getElementById('bad-btn');
         const goodBtn = document.getElementById('good-btn');
         const playground = document.getElementById('playground');
@@ -612,7 +608,6 @@
                 
                 setTimeout(() => {
                     goodBtn.classList.add('revealed');
-                    // Updated to default rainbow colors
                     confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
                 }, 300);
             }
@@ -664,7 +659,6 @@
             badBtn.style.top = newY + 'px';
         }
 
-        // --- 9. MAGNETIC GOOD BUTTON ---
         stackContainer.addEventListener('mousemove', (e) => {
             if (chaseCount < 5) return; 
 
@@ -689,32 +683,31 @@
             }
         });
 
-        // --- 9. FINAL CELEBRATION & GUARANTEED CONFETTI ---
+        // --- 9. FINAL CELEBRATION (HEAVY CONTINUOUS SHOWER, NO LAG) ---
         const finalMsg = document.getElementById('final-message');
-        
-        // Initialize custom confetti tied specifically to the final overlay canvas
         const myCanvas = document.getElementById('finale-confetti-canvas');
         const myConfetti = confetti.create(myCanvas, { resize: true, useWorker: true });
 
         goodBtn.addEventListener('click', () => {
             badBtn.style.display = 'none';
             
-            document.getElementById('all-sections-scroll-root').style.display = 'none';
+            // LOCKS NATIVE SCROLL TO KILL DOUBLE SCROLLBARS FOREVER
+            document.documentElement.style.overflow = 'hidden'; 
+            document.body.style.overflow = 'hidden'; 
 
             finalMsg.style.display = 'block';
             setTimeout(() => { finalMsg.classList.add('show'); }, 10);
 
             let duration = 6 * 1000;
             let end = Date.now() + duration;
-            // REMOVED THEME COLOR RESTRICTION FOR FINALE
 
-            // Use the dedicated canvas confetti so it fires ON TOP of the blur
-            // pass NO colors to myConfetti calls to default to standard multi-color rainbow palette
-            setTimeout(() => { myConfetti({ particleCount: 200, spread: 120, origin: { y: 0.6 } }); }, 100);
+            // MASSIVE Initial Burst
+            setTimeout(() => { myConfetti({ particleCount: 300, spread: 160, startVelocity: 50, origin: { y: 0.6 } }); }, 100);
 
+            // CONTINUOUS Heavy Rain 
             (function frame() {
-                myConfetti({ particleCount: 15, angle: 60, spread: 55, origin: { x: 0, y: 0.8 } });
-                myConfetti({ particleCount: 15, angle: 120, spread: 55, origin: { x: 1, y: 0.8 } });
+                myConfetti({ particleCount: 6, angle: 60, spread: 55, startVelocity: 45, origin: { x: 0, y: 0.8 } });
+                myConfetti({ particleCount: 6, angle: 120, spread: 55, startVelocity: 45, origin: { x: 1, y: 0.8 } });
                 if (Date.now() < end) { requestAnimationFrame(frame); }
             }());
         });
